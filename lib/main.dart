@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_instagram/screens/fedd_stream.dart';
+import 'package:flutter_firebase_instagram/screens/feed_screen.dart';
 import 'package:flutter_firebase_instagram/screens/login_screen.dart';
 import 'package:flutter_firebase_instagram/screens/signup_scree.dart';
 

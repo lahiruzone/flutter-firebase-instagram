@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_instagram/services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   static final id = 'signup_screen';
@@ -16,6 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   _submit() {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
+      AuthService.signUpUser(context, _name, _email, _password);
     }
   }
 

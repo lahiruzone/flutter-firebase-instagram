@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/screens/signup_scree.dart';
+import 'package:flutter_firebase_instagram/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   static final id = 'login_screen';
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
     }
+    AuthService.login(context, _email, _password);
   }
 
   @override
