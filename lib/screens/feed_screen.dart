@@ -16,8 +16,7 @@ class _FeedScreenState extends State<FeedScreen> {
     return Container(
       color: Colors.blue,
       child: FlatButton(
-          onPressed: () => AuthService.signOut(context),
-          child: Text('Signout')),
+          onPressed: () => AuthService.signOut(), child: Text('Signout')),
     );
   }
 }

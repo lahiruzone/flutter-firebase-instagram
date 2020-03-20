@@ -34,15 +34,15 @@ class AuthService {
           email: email, password: password);
       FirebaseUser user = authResult.user;
       if (user != null) {
-        Navigator.pushReplacementNamed(context, FeedScreen.id);
+        // Navigator.pushReplacementNamed(context, FeedScreen.id);
       }
     } catch (e) {
       print(e);
     }
   }
 
-  static void signOut(BuildContext context) {
+  static void signOut() {
     _auth.signOut();
-    Navigator.pushReplacementNamed(context, LoginScreen.id);
+    // Navigator.pushReplacementNamed(context, LoginScreen.id);
   }
 }
