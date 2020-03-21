@@ -16,12 +16,12 @@ class AuthService {
           email: email, password: password);
       FirebaseUser signedUser = authResult.user;
       if (signedUser != null) {
-        _firestore.collection('/user').document(signedUser.uid).setData({
+        _firestore.collection('/users').document(signedUser.uid).setData({
           'name': name,
           'email': email,
           'profileImageUrl': '',
         });
-        Navigator.pushReplacementNamed(context, FeedScreen.id);
+        Navigator.pop(context);
       }
     } catch (e) {
       print(e);

@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.onAuthStateChanged,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
-            return HomeScreen();
+            return HomeScreen(userId: snapshot.data.uid.toString());
           } else {
             return LoginScreen();
           }
@@ -26,6 +26,10 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       home: _screenMaping(),
+      theme: ThemeData(
+        primaryIconTheme:
+            Theme.of(context).primaryIconTheme.copyWith(color: Colors.black),
+      ),
       routes: {
         LoginScreen.id: (context) => LoginScreen(),
         SignupScreen.id: (context) => SignupScreen(),

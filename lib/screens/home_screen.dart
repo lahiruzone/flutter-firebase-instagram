@@ -6,6 +6,9 @@ import 'package:flutter_firebase_instagram/screens/profile_screen.dart';
 import 'package:flutter_firebase_instagram/screens/search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  final String userId;
+
+  HomeScreen({this.userId});
   @override
   State<StatefulWidget> createState() {
     return _HomeScreenState();
@@ -25,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -44,7 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
           SearchScreen(),
           FeedScreen(),
           ActivityScreen(),
-          ProfileScreen(),
+          ProfileScreen(
+            userId: widget.userId,
+          ),
         ],
         onPageChanged: (int index) {
           setState(() {
