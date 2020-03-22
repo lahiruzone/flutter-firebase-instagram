@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/screens/EditProfileScreen.dart';
@@ -43,6 +44,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           } else {
             User user = User.fromDoc(snapshot.data);
+            print('AAAAA');
+            print(user.profileImageUrl);
             return ListView(
               children: <Widget>[
                 Padding(
@@ -51,7 +54,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: <Widget>[
                       CircleAvatar(
                         radius: 50.0,
-                        backgroundColor: Colors.grey,
+                        backgroundImage: user.profileImageUrl.isEmpty
+                            ? AssetImage('assets/images/user_paceholder.png')
+                            : CachedNetworkImageProvider(user.profileImageUrl),
                       ),
                       Expanded(
                         child: Column(

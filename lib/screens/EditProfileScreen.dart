@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/services/database_service.dart';
+import 'package:flutter_firebase_instagram/services/storage_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final User user;
@@ -15,14 +20,21 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
+  File _profileImage;
   String _name = '';
   String _bio = '';
   String _profileImageUrl = '';
 
-  _submit() {
+  _submit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
     }
+
+    if (_profileImage != null) {
+      _profileImageUrl = await StorageService.uploadProfileImage(
+          widget.user.profileImageUrl, _profileImage);
+    }
+
     User user = User(
         id: widget.user.id,
         name: _name,
@@ -31,6 +43,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     DatabaseService.updateUser(user);
     Navigator.pop(context);
+  }
+
+  _handelImageFromGallery() async {
+    File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+    if (imageFile != null) {
+      setState(() {
+        _profileImage = imageFile;
+      });
+    }
+  }
+
+  _displayProfileImage() {
+    //No new profile Image
+    if (_profileImage == null) {
+      // No profile user Image
+      if (widget.user.profileImageUrl.isEmpty) {
+        return AssetImage('assets/images/user_paceholder.png');
+      } else {
+        return CachedNetworkImageProvider(widget.user.profileImageUrl);
+      }
+    } else {
+      return FileImage(_profileImage);
+    }
   }
 
   @override
@@ -63,11 +98,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   children: <Widget>[
                     CircleAvatar(
                       radius: 60.0,
-                      backgroundColor: Colors.grey,
-                      // backgroundImage: NetworkImage(url),
+                      backgroundImage: _displayProfileImage(),
                     ),
                     FlatButton(
-                        onPressed: () {},
+                        onPressed: _handelImageFromGallery,
                         child: Text(
                           'Change Profile Image',
                           style: TextStyle(
