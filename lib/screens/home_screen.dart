@@ -1,14 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:flutter_firebase_instagram/screens/activity_screen.dart';
 import 'package:flutter_firebase_instagram/screens/feed_screen.dart';
 import 'package:flutter_firebase_instagram/screens/profile_screen.dart';
 import 'package:flutter_firebase_instagram/screens/search_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String userId;
-
-  HomeScreen({this.userId});
   @override
   State<StatefulWidget> createState() {
     return _HomeScreenState();
@@ -29,18 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        title: Text(
-          'Instergram',
-          style: TextStyle(
-            color: Colors.black,
-            fontFamily: 'Billabong',
-            fontSize: 35.0,
-          ),
-        ),
-      ),
       body: PageView(
         controller: _pageController,
         children: <Widget>[
@@ -49,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
           FeedScreen(),
           ActivityScreen(),
           ProfileScreen(
-            userId: widget.userId,
+            userId: Provider.of<UserData>(context).currentUserId,
           ),
         ],
         onPageChanged: (int index) {

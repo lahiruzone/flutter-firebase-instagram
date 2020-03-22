@@ -13,9 +13,20 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.blue,
-      child: FlatButton(
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        title: Text(
+          'Instergram',
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: 'Billabong',
+            fontSize: 35.0,
+          ),
+        ),
+      ),
+      body: FlatButton(
           onPressed: () => AuthService.signOut(), child: Text('Signout')),
     );
   }

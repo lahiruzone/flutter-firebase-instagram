@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:flutter_firebase_instagram/screens/feed_screen.dart';
 import 'package:flutter_firebase_instagram/screens/home_screen.dart';
 import 'package:flutter_firebase_instagram/screens/login_screen.dart';
 import 'package:flutter_firebase_instagram/screens/signup_scree.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(MultiProvider(
+    providers: [ChangeNotifierProvider(create: (_) => UserData())],
+    child: MyApp()));
 
 class MyApp extends StatelessWidget {
   _screenMaping() {
@@ -13,7 +17,8 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.onAuthStateChanged,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
-            return HomeScreen(userId: snapshot.data.uid.toString());
+            Provider.of<UserData>(context).currentUserId = snapshot.data.uid;
+            return HomeScreen();
           } else {
             return LoginScreen();
           }
