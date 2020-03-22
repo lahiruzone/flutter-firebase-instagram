@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:flutter_firebase_instagram/screens/activity_screen.dart';
+import 'package:flutter_firebase_instagram/screens/create_post_screen.dart';
 import 'package:flutter_firebase_instagram/screens/feed_screen.dart';
 import 'package:flutter_firebase_instagram/screens/profile_screen.dart';
 import 'package:flutter_firebase_instagram/screens/search_screen.dart';
@@ -33,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: <Widget>[
           FeedScreen(),
           SearchScreen(),
-          FeedScreen(),
+          CreatePostScreen(),
           ActivityScreen(),
           ProfileScreen(
             userId: Provider.of<UserData>(context).currentUserId,
