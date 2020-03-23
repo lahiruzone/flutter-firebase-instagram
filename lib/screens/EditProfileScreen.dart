@@ -24,25 +24,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String _name = '';
   String _bio = '';
   String _profileImageUrl = '';
+  bool _isLoading = false;
 
   _submit() async {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState.validate() && !_isLoading) {
       _formKey.currentState.save();
+
+      setState(() {
+        _isLoading =true;
+      });
+
+      if (_profileImage != null) {
+        _profileImageUrl = await StorageService.uploadProfileImage(
+            widget.user.profileImageUrl, _profileImage);
+      }
+
+      User user = User(
+          id: widget.user.id,
+          name: _name,
+          bio: _bio,
+          profileImageUrl: _profileImageUrl);
+
+      DatabaseService.updateUser(user);
+      Navigator.pop(context);
     }
-
-    if (_profileImage != null) {
-      _profileImageUrl = await StorageService.uploadProfileImage(
-          widget.user.profileImageUrl, _profileImage);
-    }
-
-    User user = User(
-        id: widget.user.id,
-        name: _name,
-        bio: _bio,
-        profileImageUrl: _profileImageUrl);
-
-    DatabaseService.updateUser(user);
-    Navigator.pop(context);
   }
 
   _handelImageFromGallery() async {

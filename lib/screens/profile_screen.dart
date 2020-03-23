@@ -1,13 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/screens/EditProfileScreen.dart';
+import 'package:flutter_firebase_instagram/services/database_service.dart';
 import 'package:flutter_firebase_instagram/utilities/constant.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
+  final String currentUserId;
 
-  ProfileScreen({this.userId});
+  ProfileScreen({this.currentUserId, this.userId});
 
   @override
   State<StatefulWidget> createState() {
@@ -16,11 +20,48 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  _profileDetails(String count, String description) {
+  bool _isFollowing = false;
+  int _followerCount = 0;
+  int _followingCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupIsFollowing();
+    _setupFollowers();
+    _setupFollowing();
+  }
+
+  //becourse you can not run asyn in init
+  _setupIsFollowing() async {
+    bool isFollowingUser = await DatabaseService.isFollowingUser(
+        //we canot pass Provider to currentUserId becourse it needd context and the context is unavalable in init state so pass it from privious screen
+        currentUserId: widget.currentUserId,
+        userId: widget.userId);
+    setState(() {
+      _isFollowing = isFollowingUser;
+    });
+  }
+
+  _setupFollowers() async {
+    int userFollowerCount = await DatabaseService.numFollowers(widget.userId);
+    setState(() {
+      _followerCount = userFollowerCount;
+    });
+  }
+
+  _setupFollowing() async {
+    int userFollowingCount = await DatabaseService.numFollowing(widget.userId);
+    setState(() {
+      _followingCount = userFollowingCount;
+    });
+  }
+
+  _profileDetails(int count, String description) {
     return Column(
       children: <Widget>[
         Text(
-          count,
+          count.toString(),
           style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
         ),
         Text(
@@ -29,6 +70,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
+  }
+
+  _displayButton(User user) {
+    return user.id ==
+            Provider.of<UserData>(context, listen: false).currentUserId
+        ? Container(
+            width: 200.0,
+            child: FlatButton(
+                color: Colors.blue,
+                textColor: Colors.white,
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => EditProfileScreen(user: user))),
+                child: Text(
+                  'Edit Profile',
+                  style: TextStyle(fontSize: 18.0),
+                )),
+          )
+        : Container(
+            width: 200.0,
+            child: FlatButton(
+                color: _isFollowing ? Colors.grey[300] : Colors.blue,
+                textColor: _isFollowing ? Colors.black : Colors.white,
+                onPressed: () {
+                  if (_isFollowing) {
+                    print("ISF trur>>>>>>>>>>>>>>>>>.");
+                    DatabaseService.unFollowUser(
+                        Provider.of<UserData>(context, listen: false)
+                            .currentUserId,
+                        user.id);
+                    setState(() {
+                      _isFollowing = false;
+                      _followerCount--;
+                    });
+                  } else {
+                    print("ISF false>>>>>>>>>>>>>>>>>.");
+                    DatabaseService.followUser(
+                        Provider.of<UserData>(context, listen: false)
+                            .currentUserId,
+                        user.id);
+                    setState(() {
+                      _isFollowing = true;
+                      _followerCount++;
+                    });
+                  }
+                },
+                child: Text(
+                  _isFollowing ? 'Unfollow' : 'Follow',
+                  style: TextStyle(fontSize: 18.0),
+                )),
+          );
   }
 
   @override
@@ -76,26 +169,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
-                                _profileDetails('12', 'Posts'),
-                                _profileDetails('385', 'Fellowing'),
-                                _profileDetails('1050', 'Fellowers'),
+                                _profileDetails(12, 'Posts'),
+                                _profileDetails(_followingCount, 'Following'),
+                                _profileDetails(_followerCount, 'Followers'),
                               ],
                             ),
-                            Container(
-                              width: 200.0,
-                              child: FlatButton(
-                                  color: Colors.blue,
-                                  textColor: Colors.white,
-                                  onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              EditProfileScreen(user: user))),
-                                  child: Text(
-                                    'Edit Profile',
-                                    style: TextStyle(fontSize: 18.0),
-                                  )),
-                            )
+                            _displayButton(user),
                           ],
                         ),
                       )
