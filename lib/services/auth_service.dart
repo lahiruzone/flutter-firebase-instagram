@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 class AuthService {
   static final _auth = FirebaseAuth.instance;
@@ -21,29 +22,28 @@ class AuthService {
           'email': email,
           'profileImageUrl': '',
         });
-        Provider.of<UserData>(context, listen: false).currentUserId = signedUser.uid;
+        Provider.of<UserData>(context, listen: false).currentUserId =
+            signedUser.uid;
         Navigator.pop(context);
       }
-    } catch (e) {
-      print(e);
+    } on PlatformException catch (err) {
+      throw (err);
     }
   }
 
-  static Future<void> login(BuildContext context, String email, String password) async {
+  static Future<void> login(
+      BuildContext context, String email, String password) async {
     try {
       AuthResult authResult = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       FirebaseUser user = authResult.user;
-      if (user != null) {
-        // Navigator.pushReplacementNamed(context, FeedScreen.id);
-      }
-    } catch (e) {
-      print(e);
+      if (user != null) {}
+    } on PlatformException catch (err) {
+      throw (err);
     }
   }
 
   static void signOut() {
     _auth.signOut();
-    // Navigator.pushReplacementNamed(context, LoginScreen.id);
   }
 }

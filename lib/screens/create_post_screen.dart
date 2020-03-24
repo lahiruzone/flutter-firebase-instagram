@@ -145,7 +145,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             IconButton(
                 icon: Icon(
                   Icons.add,
-                  color: Colors.black,
+                  color: _imageFile == null ?Colors.black: Colors.blue,
                 ),
                 onPressed: _submit)
           ],

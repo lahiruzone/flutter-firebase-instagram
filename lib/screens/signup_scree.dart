@@ -23,13 +23,33 @@ class _SignupScreenState extends State<SignupScreen> {
     _prograssDailog.show();
   }
 
-  _submit() {
+  _submit() async {
     if (_formKey.currentState.validate()) {
       _showPrograssDailog();
       _formKey.currentState.save();
-      AuthService.signUpUser(context, _name, _email, _password)
-          .then((_) => _prograssDailog.dismiss());
+      try {
+        await AuthService.signUpUser(context, _name, _email, _password)
+            .then((_) => _prograssDailog.dismiss());
+      } catch (error) {
+        _prograssDailog.dismiss();
+        _showErrorDailog(error.message);
+      }
     }
+  }
+
+  _showErrorDailog(String errorMessage) {
+    showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(errorMessage),
+            actions: <Widget>[
+              FlatButton(
+                  onPressed: () => Navigator.pop(context), child: Text('Ok'))
+            ],
+          );
+        });
   }
 
   @override

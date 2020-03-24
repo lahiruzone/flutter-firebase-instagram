@@ -24,14 +24,33 @@ class _LoginScreenState extends State<LoginScreen> {
     pr.show();
   }
 
-  _submit() {
+  _submit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _showPrograssDailog();
-      // PrograssDailog.showprogressDaolog(context);
     }
-    AuthService.login(context, _email, _password)
-        .then((_) => {pr.dismiss()});
+    try {
+      await AuthService.login(context, _email, _password)
+          .then((_) => {pr.dismiss()});
+    } catch (err) {
+      pr.dismiss();
+      _showErrorDailog(err.message);
+    }
+  }
+
+  _showErrorDailog(String errorMessage) {
+    showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(errorMessage),
+            actions: <Widget>[
+              FlatButton(
+                  onPressed: () => Navigator.pop(context), child: Text('Ok'))
+            ],
+          );
+        });
   }
 
   @override
