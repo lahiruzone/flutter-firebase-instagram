@@ -9,6 +9,7 @@ import 'package:flutter_firebase_instagram/services/database_service.dart';
 import 'package:flutter_firebase_instagram/services/storage_service.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -23,6 +24,14 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   TextEditingController _captionController = TextEditingController();
   String _caption = '';
   bool _islooding = false;
+  ProgressDialog _prograssDailog;
+
+  _showPrograssDailog() {
+    _prograssDailog = new ProgressDialog(context,
+        isDismissible: false, type: ProgressDialogType.Normal, showLogs: false);
+    _prograssDailog.style(message: 'Posting');
+    _prograssDailog.show();
+  }
 
   _showSelectImageDailog() {
     return Platform.isIOS ? _iosBottomSheet() : _androidBottomSheet();
@@ -86,14 +95,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         aspectRatio: CropAspectRatio(ratioX: 1.0, ratioY: 1.0));
     return croppedImage;
   }
+
   _submit() async {
-    if(!_islooding && _imageFile != null && _caption.trim().isNotEmpty){
+    if (!_islooding && _imageFile != null && _caption.trim().isNotEmpty) {
+      _showPrograssDailog();
       setState(() {
         _islooding = true;
       });
 
       //create post
-      String imageUrl = await StorageService.uploadPostImage(context, _imageFile);
+      String imageUrl =
+          await StorageService.uploadPostImage(context, _imageFile);
       Post post = Post(
         imageUrl: imageUrl,
         caption: _caption,
@@ -102,14 +114,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         timestamp: Timestamp.fromDate(DateTime.now()),
       );
 
-      DatabaseService.createPost(post);
+      DatabaseService.createPost(post).then((value) {
+        //reset data
+        _captionController.clear();
+        setState(() {
+          _caption = '';
+          _imageFile = null;
+          _islooding = false;
+        });
 
-      //reset data
-      _captionController.clear();
-      setState(() {
-        _caption = '';
-        _imageFile = null;
-        _islooding = false;
+        _prograssDailog.dismiss();
       });
     }
   }
@@ -136,19 +150,24 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 onPressed: _submit)
           ],
         ),
-        body: GestureDetector(                               //GestureDetector: on tap=> for when you tap background of view keyboard diapper
+        body: GestureDetector(
+          //GestureDetector: on tap=> for when you tap background of view keyboard diapper
           onTap: () => FocusScope.of(context).unfocus(),
           child: SingleChildScrollView(
             child: Container(
               height: height,
               child: Column(
                 children: <Widget>[
-                  _islooding ? Padding(padding: EdgeInsets.only(bottom: 10.0), child: LinearProgressIndicator(
-                    backgroundColor: Colors.blue[200],
-                    valueColor: AlwaysStoppedAnimation(Colors.blue),
-                  ),)
-                  : SizedBox.shrink(),
-                  GestureDetector( 
+                  _islooding
+                      ? Padding(
+                          padding: EdgeInsets.only(bottom: 10.0),
+                          child: LinearProgressIndicator(
+                            backgroundColor: Colors.blue[200],
+                            valueColor: AlwaysStoppedAnimation(Colors.blue),
+                          ),
+                        )
+                      : SizedBox.shrink(),
+                  GestureDetector(
                     onTap: _showSelectImageDailog,
                     child: Container(
                       width: width,

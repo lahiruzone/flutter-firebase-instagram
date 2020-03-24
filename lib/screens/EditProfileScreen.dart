@@ -6,6 +6,7 @@ import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/services/database_service.dart';
 import 'package:flutter_firebase_instagram/services/storage_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final User user;
@@ -25,13 +26,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String _bio = '';
   String _profileImageUrl = '';
   bool _isLoading = false;
+  ProgressDialog _prograssDailog;
+
+  _showPrograssDailog() {
+    _prograssDailog = new ProgressDialog(context,
+        isDismissible: false, type: ProgressDialogType.Normal, showLogs: false);
+    _prograssDailog.style(message: 'Updating');
+    _prograssDailog.show();
+  }
 
   _submit() async {
     if (_formKey.currentState.validate() && !_isLoading) {
+      _showPrograssDailog();
       _formKey.currentState.save();
 
       setState(() {
-        _isLoading =true;
+        _isLoading = true;
       });
 
       if (_profileImage != null) {
@@ -45,7 +55,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           bio: _bio,
           profileImageUrl: _profileImageUrl);
 
-      DatabaseService.updateUser(user);
+      DatabaseService.updateUser(user).then((_) => _prograssDailog.dismiss());
       Navigator.pop(context);
     }
   }

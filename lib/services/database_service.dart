@@ -4,7 +4,7 @@ import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/utilities/constant.dart';
 
 class DatabaseService {
-  static void updateUser(User user) async {
+  static Future<void> updateUser(User user) async {
     userRef.document(user.id).updateData({
       'name': user.name,
       'bio': user.bio,
@@ -12,7 +12,7 @@ class DatabaseService {
     });
   }
 
-  static void createPost(Post post) {
+  static Future<void> createPost(Post post) async {
     postRef.document(post.authorId).collection('usersPost').add({
       'imageUrl': post.imageUrl,
       'caption': post.caption,
@@ -102,5 +102,26 @@ class DatabaseService {
         .getDocuments();
     print('>>>>>>>>>>>>>>>>>>>>>>>>>$followingSnapshot.documents.length');
     return followingSnapshot.documents.length;
+  }
+
+  static Future<List<Post>> getFeedPosts(String userId) async {
+    QuerySnapshot feedsSnapshot = await feedsRef
+        .document(userId)
+        .collection('userFeed')
+        .orderBy('timeStamp', descending: true)
+        .getDocuments();
+
+    List<Post> posts =
+        feedsSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  //post have authorId, so we need a methord to getuser details from a ID
+  static Future<User> getUserFromId(String userId) async {
+    DocumentSnapshot userDocSnapshot = await userRef.document(userId).get();
+    if (userDocSnapshot.exists) {
+      return User.fromDoc(userDocSnapshot);
+    }
+    return User();
   }
 }

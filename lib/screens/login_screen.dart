@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/screens/signup_scree.dart';
 import 'package:flutter_firebase_instagram/services/auth_service.dart';
+import 'package:flutter_firebase_instagram/utilities/prograss_dailog.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   static final id = 'login_screen';
@@ -13,12 +15,23 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   String _email, _password;
+  ProgressDialog pr;
+
+  _showPrograssDailog() {
+    pr = new ProgressDialog(context,
+        isDismissible: false, type: ProgressDialogType.Normal, showLogs: false);
+    pr.style(message: 'Logging');
+    pr.show();
+  }
 
   _submit() {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
+      _showPrograssDailog();
+      // PrograssDailog.showprogressDaolog(context);
     }
-    AuthService.login(context, _email, _password);
+    AuthService.login(context, _email, _password)
+        .then((_) => {pr.dismiss()});
   }
 
   @override

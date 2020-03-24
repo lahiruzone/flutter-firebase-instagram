@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/services/auth_service.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class SignupScreen extends StatefulWidget {
   static final id = 'signup_screen';
@@ -13,11 +14,21 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   String _name, _email, _password;
+  ProgressDialog _prograssDailog;
+
+  _showPrograssDailog() {
+    _prograssDailog = new ProgressDialog(context,
+        isDismissible: false, type: ProgressDialogType.Normal, showLogs: false);
+    _prograssDailog.style(message: 'Signing');
+    _prograssDailog.show();
+  }
 
   _submit() {
     if (_formKey.currentState.validate()) {
+      _showPrograssDailog();
       _formKey.currentState.save();
-      AuthService.signUpUser(context, _name, _email, _password);
+      AuthService.signUpUser(context, _name, _email, _password)
+          .then((_) => _prograssDailog.dismiss());
     }
   }
 
