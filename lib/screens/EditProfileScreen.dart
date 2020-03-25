@@ -26,25 +26,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String _bio = '';
   String _profileImageUrl = '';
   bool _isLoading = false;
-  ProgressDialog _prograssDailog;
+  ProgressDialog pr;
 
   _showPrograssDailog() {
-    _prograssDailog = new ProgressDialog(context,
+    pr = new ProgressDialog(context,
         isDismissible: false, type: ProgressDialogType.Normal, showLogs: false);
-    _prograssDailog.style(message: 'Updating');
-    _prograssDailog.show();
+    pr.style(message: 'Logging');
+    pr.show();
   }
 
   _submit() async {
     if (_formKey.currentState.validate() && !_isLoading) {
-      _showPrograssDailog();
       _formKey.currentState.save();
-
-      setState(() {
-        _isLoading = true;
-      });
+      _showPrograssDailog();
+      // setState(() {
+      //   _isLoading = true;
+      // });
 
       if (_profileImage != null) {
+        print('uploading image');
         _profileImageUrl = await StorageService.uploadProfileImage(
             widget.user.profileImageUrl, _profileImage);
       }
@@ -55,10 +55,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           bio: _bio,
           profileImageUrl: _profileImageUrl);
 
-      DatabaseService.updateUser(user).then((_) => _prograssDailog.dismiss());
-      Navigator.pop(context);
+      await DatabaseService.updateUser(user)
+          .then((value) {pr.dismiss();  Navigator.pop(context);});
     }
   }
+
+  // _submitWithImage() async {
+  //   if (_formKey.currentState.validate()) {
+  //     _formKey.currentState.save();
+  //     _showPrograssDailog();
+
+  //     print('uploading image');
+  //     await StorageService.uploadProfileImage(
+  //             widget.user.profileImageUrl, _profileImage)
+  //         .then((value) async {
+  //       _profileImageUrl = value;
+  //       User user = User(
+  //           id: widget.user.id,
+  //           name: _name,
+  //           bio: _bio,
+  //           profileImageUrl: _profileImageUrl);
+
+  //       DatabaseService.updateUser(user).then((value) {
+  //         pr.dismiss();
+  //         Navigator.pop(context);
+  //       });
+  //     });
+  //   }
+  // }
+
+  // _submitWithoutImage() async {
+  //   if (_formKey.currentState.validate()) {
+  //     _formKey.currentState.save();
+  //     _showPrograssDailog();
+
+  //     print('No uploading image');
+
+  //     User user = User(
+  //         id: widget.user.id,
+  //         name: _name,
+  //         bio: _bio,
+  //         profileImageUrl: _profileImageUrl);
+
+  //     await DatabaseService.updateUser(user).then((value) {
+  //       pr.dismiss();
+  //       Navigator.pop(context);
+  //     });
+  //   }
+  // }
 
   _handelImageFromGallery() async {
     File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -88,6 +132,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.initState();
     _name = widget.user.name;
     _bio = widget.user.bio;
+    _profileImageUrl = widget.user.profileImageUrl;
   }
 
   @override

@@ -27,7 +27,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   ProgressDialog _prograssDailog;
 
   _showPrograssDailog() {
-    _prograssDailog = new ProgressDialog(context,
+    _prograssDailog = ProgressDialog(context,
         isDismissible: false, type: ProgressDialogType.Normal, showLogs: false);
     _prograssDailog.style(message: 'Posting');
     _prograssDailog.show();

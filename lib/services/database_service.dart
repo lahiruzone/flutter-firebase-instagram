@@ -5,11 +5,12 @@ import 'package:flutter_firebase_instagram/utilities/constant.dart';
 
 class DatabaseService {
   static Future<void> updateUser(User user) async {
-    userRef.document(user.id).updateData({
+   await userRef.document(user.id).updateData({
       'name': user.name,
       'bio': user.bio,
       'profileImageUrl': user.profileImageUrl,
     });
+    
   }
 
   static Future<void> createPost(Post post) async {
