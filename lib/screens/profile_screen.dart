@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_instagram/models/post_model.dart';
 import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/screens/EditProfileScreen.dart';
 import 'package:flutter_firebase_instagram/services/database_service.dart';
 import 'package:flutter_firebase_instagram/utilities/constant.dart';
+import 'package:flutter_firebase_instagram/widgets/post_list_view.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -23,6 +25,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isFollowing = false;
   int _followerCount = 0;
   int _followingCount = 0;
+  List<Post> _posts = [];
+  User _author;
+  int _displayPost = 0; // 0 - gird, 1 - colum
 
   @override
   void initState() {
@@ -30,6 +35,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _setupIsFollowing();
     _setupFollowers();
     _setupFollowing();
+    _setupUserPosts();
+    _setUpPostAuthor();
   }
 
   //becourse you can not run asyn in init
@@ -54,6 +61,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     int userFollowingCount = await DatabaseService.numFollowing(widget.userId);
     setState(() {
       _followingCount = userFollowingCount;
+    });
+  }
+
+  _setupUserPosts() async {
+    List<Post> posts = await DatabaseService.getUserPosts(widget.userId);
+    setState(() {
+      _posts = posts;
+    });
+  }
+
+  _setUpPostAuthor() async {
+    User author = await DatabaseService.getUserFromId(widget.userId);
+    setState(() {
+      _author = author;
     });
   }
 
@@ -124,6 +145,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
   }
 
+  _buildProfileInfor(User user) {
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 0),
+          child: Row(
+            children: <Widget>[
+              CircleAvatar(
+                radius: 50.0,
+                backgroundImage: user.profileImageUrl.isEmpty
+                    ? AssetImage('assets/images/user_paceholder.png')
+                    : CachedNetworkImageProvider(user.profileImageUrl),
+              ),
+              Expanded(
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        _profileDetails(_posts.length, 'Posts'),
+                        _profileDetails(_followingCount, 'Following'),
+                        _profileDetails(_followerCount, 'Followers'),
+                      ],
+                    ),
+                    _displayButton(user),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                user.name,
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Container(height: 80.0, child: Text(user.bio)),
+              Divider()
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  _buildToggleButton() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        IconButton(
+            icon: Icon(Icons.grid_on),
+            iconSize: 30.0,
+            color: _displayPost == 0
+                ? Theme.of(context).primaryColor
+                : Colors.grey,
+            onPressed: () {
+              setState(() {
+                _displayPost = 0;
+              });
+            }),
+        IconButton(
+            icon: Icon(Icons.list),
+            iconSize: 30.0,
+            color: _displayPost == 1
+                ? Theme.of(context).primaryColor
+                : Colors.grey,
+            onPressed: () {
+              setState(() {
+                _displayPost = 1;
+              });
+            })
+      ],
+    );
+  }
+
+  _buildTilePost(Post post) {
+    return GridTile(
+      child: Image(
+        image: CachedNetworkImageProvider(post.imageUrl),
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  _buildDispalyPost() {
+    if (_displayPost == 0) {
+      //Grid
+      List<GridTile> tiles = [];
+      _posts.forEach((post) => tiles.add(_buildTilePost(post)));
+      return GridView.count(
+        crossAxisCount: 3,
+        childAspectRatio: 1.0,
+        mainAxisSpacing: 2.0,
+        crossAxisSpacing: 2.0,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(), //to scroll whole page
+        // children: <Widget>[],
+        children: tiles,
+      );
+    } else {
+      //Column
+      List<PostListView> postListView = [];
+      _posts.forEach((post) {
+        postListView.add(PostListView(
+          post: post,
+          currentUserId: widget.currentUserId,
+          author: _author,
+          isPostListVieweUsedInProfileScreen: true,
+        ));
+      });
+      return Column(
+        children: postListView,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,53 +297,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             print(user.profileImageUrl);
             return ListView(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 0),
-                  child: Row(
-                    children: <Widget>[
-                      CircleAvatar(
-                        radius: 50.0,
-                        backgroundImage: user.profileImageUrl.isEmpty
-                            ? AssetImage('assets/images/user_paceholder.png')
-                            : CachedNetworkImageProvider(user.profileImageUrl),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                _profileDetails(12, 'Posts'),
-                                _profileDetails(_followingCount, 'Following'),
-                                _profileDetails(_followerCount, 'Followers'),
-                              ],
-                            ),
-                            _displayButton(user),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 30.0, vertical: 10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        user.name,
-                        style: TextStyle(
-                            fontSize: 18.0, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: 5.0,
-                      ),
-                      Container(height: 80.0, child: Text(user.bio)),
-                      Divider()
-                    ],
-                  ),
-                ),
+                _buildProfileInfor(user),
+                _buildToggleButton(),
+                _buildDispalyPost(),
               ],
             );
           }

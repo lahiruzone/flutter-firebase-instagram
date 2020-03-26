@@ -5,13 +5,13 @@ import 'package:flutter_firebase_instagram/utilities/constant.dart';
 
 class DatabaseService {
   static Future<void> updateUser(User user) async {
-   await userRef.document(user.id).updateData({
+    await userRef.document(user.id).updateData({
       'name': user.name,
       'bio': user.bio,
       'profileImageUrl': user.profileImageUrl,
     });
-    
   }
+  
 
   static Future<void> createPost(Post post) async {
     postRef.document(post.authorId).collection('usersPost').add({
@@ -28,6 +28,7 @@ class DatabaseService {
         userRef.where('name', isGreaterThanOrEqualTo: name).getDocuments();
     return users;
   }
+  
 
   static void followUser(String currentUserId, String userId) {
     print('Callin >>>>>>>>>>>>>>>>>>>>>>>>> Flw');
@@ -114,6 +115,19 @@ class DatabaseService {
 
     List<Post> posts =
         feedsSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  static Future<List<Post>> getUserPosts(String userId) async {
+    QuerySnapshot postsSnapshot = await postRef
+        .document(userId)
+        .collection('usersPost')
+        .orderBy('timeStamp', descending: true)
+        .getDocuments();
+
+    List<Post> posts =
+        postsSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+
     return posts;
   }
 
