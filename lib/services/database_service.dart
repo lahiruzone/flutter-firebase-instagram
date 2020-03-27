@@ -11,13 +11,12 @@ class DatabaseService {
       'profileImageUrl': user.profileImageUrl,
     });
   }
-  
 
   static Future<void> createPost(Post post) async {
-    postRef.document(post.authorId).collection('usersPost').add({
+    postsRef.document(post.authorId).collection('userPosts').add({
       'imageUrl': post.imageUrl,
       'caption': post.caption,
-      'likes': post.likes,
+      'likesCount': post.likeCount,
       'authorId': post.authorId,
       'timeStamp': post.timestamp,
     });
@@ -28,7 +27,6 @@ class DatabaseService {
         userRef.where('name', isGreaterThanOrEqualTo: name).getDocuments();
     return users;
   }
-  
 
   static void followUser(String currentUserId, String userId) {
     print('Callin >>>>>>>>>>>>>>>>>>>>>>>>> Flw');
@@ -119,9 +117,9 @@ class DatabaseService {
   }
 
   static Future<List<Post>> getUserPosts(String userId) async {
-    QuerySnapshot postsSnapshot = await postRef
+    QuerySnapshot postsSnapshot = await postsRef
         .document(userId)
-        .collection('usersPost')
+        .collection('userPosts')
         .orderBy('timeStamp', descending: true)
         .getDocuments();
 
@@ -138,5 +136,54 @@ class DatabaseService {
       return User.fromDoc(userDocSnapshot);
     }
     return User();
+  }
+
+  static void likePost({String currentUserId, Post post}) async{
+    DocumentReference postRef = postsRef
+        .document(post.authorId)
+        .collection('userPosts')
+        .document(post.id);
+
+    postRef.get().then((doc) {
+      int likeCount = doc.data['likesCount'];
+      String des = doc.data['caption'];
+      print('like Count >>>   $likeCount');
+      print('like Count >>>   $des');
+      postRef.updateData({'likesCount': likeCount + 1});
+
+      likesRef
+          .document(post.id)
+          .collection('postLikes')
+          .document(currentUserId)
+          .setData({});
+    });
+  }
+
+  static void unLikePost({String currentUserId, Post post}) async{
+    DocumentReference postRef = postsRef
+        .document(post.authorId)
+        .collection('userPosts')
+        .document(post.id);
+
+    postRef.get().then((doc) {
+      int likeCount = doc.data['likesCount'];
+      print('like Count >>>   $likeCount');
+      postRef.updateData({'likesCount': likeCount - 1});
+
+      likesRef
+          .document(post.id)
+          .collection('postLikes')
+          .document(currentUserId)
+          .delete();
+    });
+  }
+
+  static Future<bool> didLikePost({String currentUserId, Post post}) async {
+    DocumentSnapshot userDoc = await likesRef
+        .document(post.id)
+        .collection('postLikes')
+        .document(currentUserId)
+        .get();
+    return userDoc.exists;
   }
 }

@@ -4,19 +4,19 @@ class Post{
   final String id;
   final String imageUrl;
   final String caption;
-  final dynamic likes; //Map UserId-True
+  final int likeCount; //Map UserId-True
   final String authorId;
   final Timestamp timestamp;
 
 
-  Post({this.id, this.imageUrl, this.caption, this.likes, this.authorId, this.timestamp});
+  Post({this.id, this.imageUrl, this.caption, this.likeCount, this.authorId, this.timestamp});
 
   factory Post.fromDoc(DocumentSnapshot doc) {
     return Post(
       id: doc.documentID,
       imageUrl: doc['imageUrl'],
       caption: doc['caption'],
-      likes: doc['likes'],
+      likeCount: doc['likesCount'],
       authorId: doc['authorId'],
       timestamp: doc['timeStamp']
     );
