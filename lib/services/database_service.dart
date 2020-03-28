@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_firebase_instagram/models/activity_model.dart';
 import 'package:flutter_firebase_instagram/models/post_model.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/utilities/constant.dart';
@@ -158,6 +159,8 @@ class DatabaseService {
           .document(currentUserId)
           .setData({});
     });
+
+    addActivityItem(post: post, currentUserId: currentUserId, comment: null);
   }
 
   static void unLikePost({String currentUserId, Post post}) async {
@@ -189,11 +192,51 @@ class DatabaseService {
   }
 
   static Future<Void> commentPost(
-      {String currentUserId, String postId, String content}) async {
-    await commentsRef.document(postId).collection('postComments').add({
+      {String currentUserId, Post post, String content}) async {
+    await commentsRef.document(post.id).collection('postComments').add({
       'content': content,
       'authorId': currentUserId,
       'timeStamp': Timestamp.fromDate(DateTime.now()),
     });
+
+    addActivityItem(currentUserId: currentUserId, post: post, comment: content);
+  }
+
+  static void addActivityItem(
+      {String currentUserId, Post post, String comment}) {
+    //stop adding own like and commet to activity
+    if (currentUserId != post.authorId) {
+      activitiesRef.document(post.authorId).collection('userActivities').add({
+        'fromUserId': currentUserId,
+        'postId': post.id,
+        'postImageUrl': post.imageUrl,
+        'comment': comment,
+        'timeStamp': Timestamp.fromDate(DateTime.now())
+      });
+    }
+  }
+
+  static Future<List<Activity>> getActivities(String userId) async {
+    QuerySnapshot userActivitySnapshot = await activitiesRef
+        .document(userId)
+        .collection('userActivities')
+        .orderBy('timeStamp', descending: true)
+        .getDocuments();
+
+    List<Activity> activities = userActivitySnapshot.documents
+        .map((doc) => Activity.formDoc(doc))
+        .toList();
+
+    return activities;
+  }
+
+  static Future<Post> getUserPost(String userId, String postId) async {
+    DocumentSnapshot postDocSnapshot = await postsRef
+        .document(userId)
+        .collection('userPosts')
+        .document(postId)
+        .get();
+    Post post = Post.fromDoc(postDocSnapshot);
+    return post;
   }
 }

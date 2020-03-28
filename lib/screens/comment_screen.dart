@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/models/comment_model.dart';
+import 'package:flutter_firebase_instagram/models/post_model.dart';
 import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/services/database_service.dart';
@@ -10,10 +11,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CommetScreen extends StatefulWidget {
-  final String postId;
+  final Post post;
   final int likeConut;
 
-  const CommetScreen({this.postId, this.likeConut});
+  const CommetScreen({this.post, this.likeConut});
   @override
   _CommetScreenState createState() => _CommetScreenState();
 }
@@ -39,7 +40,7 @@ class _CommetScreenState extends State<CommetScreen> {
             ),
             title: Text(author.name),
             subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(comment.content),
                 SizedBox(
@@ -93,7 +94,7 @@ class _CommetScreenState extends State<CommetScreen> {
                       if (_isCommenting) {
                         DatabaseService.commentPost(
                             currentUserId: currentUserId,
-                            postId: widget.postId,
+                            post: widget.post,
                             content: _commentController.text);
                       }
                       _commentController.clear();
@@ -126,7 +127,7 @@ class _CommetScreenState extends State<CommetScreen> {
           ),
           StreamBuilder(
             stream: commentsRef
-                .document(widget.postId)
+                .document(widget.post.id)
                 .collection('postComments')
                 .orderBy('timeStamp', descending: true)
                 .snapshots(),

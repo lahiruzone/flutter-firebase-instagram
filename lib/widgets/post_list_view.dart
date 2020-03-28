@@ -223,7 +223,7 @@ class _PostListViewState extends State<PostListView> {
                             context,
                             MaterialPageRoute(
                                 builder: (_) => CommetScreen(
-                                      postId: widget.post.id,
+                                      post: widget.post,
                                       likeConut: _likeCount,
                                     )));
                       })
