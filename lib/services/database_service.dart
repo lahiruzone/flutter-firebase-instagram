@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_firebase_instagram/models/post_model.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
@@ -138,7 +139,7 @@ class DatabaseService {
     return User();
   }
 
-  static void likePost({String currentUserId, Post post}) async{
+  static void likePost({String currentUserId, Post post}) async {
     DocumentReference postRef = postsRef
         .document(post.authorId)
         .collection('userPosts')
@@ -159,7 +160,7 @@ class DatabaseService {
     });
   }
 
-  static void unLikePost({String currentUserId, Post post}) async{
+  static void unLikePost({String currentUserId, Post post}) async {
     DocumentReference postRef = postsRef
         .document(post.authorId)
         .collection('userPosts')
@@ -185,5 +186,14 @@ class DatabaseService {
         .document(currentUserId)
         .get();
     return userDoc.exists;
+  }
+
+  static Future<Void> commentPost(
+      {String currentUserId, String postId, String content}) async {
+    await commentsRef.document(postId).collection('postComments').add({
+      'content': content,
+      'authorId': currentUserId,
+      'timeStamp': Timestamp.fromDate(DateTime.now()),
+    });
   }
 }

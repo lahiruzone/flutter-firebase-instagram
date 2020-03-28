@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_instagram/models/post_model.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
+import 'package:flutter_firebase_instagram/screens/comment_screen.dart';
 import 'package:flutter_firebase_instagram/screens/profile_screen.dart';
 import 'package:flutter_firebase_instagram/services/database_service.dart';
 
@@ -34,7 +35,7 @@ class _PostListViewState extends State<PostListView> {
   void initState() {
     super.initState();
     _likeCount = widget.post.likeCount;
-    _initPostIsLiked(); 
+    _initPostIsLiked();
   }
 
   //called when we refresh listviewbuilder
@@ -49,7 +50,7 @@ class _PostListViewState extends State<PostListView> {
   _initPostIsLiked() async {
     bool isLiked = await DatabaseService.didLikePost(
         post: widget.post, currentUserId: widget.currentUserId);
-        //mounted -> Listen thst the widget in the tree bofore setting state
+    //mounted -> Listen thst the widget in the tree bofore setting state
     if (mounted) {
       setState(() {
         _isLiked = isLiked;
@@ -217,7 +218,15 @@ class _PostListViewState extends State<PostListView> {
                   IconButton(
                       icon: Icon(Icons.comment),
                       iconSize: 30.0,
-                      onPressed: () {})
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => CommetScreen(
+                                      postId: widget.post.id,
+                                      likeConut: _likeCount,
+                                    )));
+                      })
                 ],
               ),
               Padding(

@@ -4,6 +4,7 @@ import 'package:flutter_firebase_instagram/models/post_model.dart';
 import 'package:flutter_firebase_instagram/models/user_data.dart';
 import 'package:flutter_firebase_instagram/models/user_model.dart';
 import 'package:flutter_firebase_instagram/screens/EditProfileScreen.dart';
+import 'package:flutter_firebase_instagram/screens/comment_screen.dart';
 import 'package:flutter_firebase_instagram/services/database_service.dart';
 import 'package:flutter_firebase_instagram/utilities/constant.dart';
 import 'package:flutter_firebase_instagram/widgets/post_list_view.dart';
@@ -229,9 +230,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   _buildTilePost(Post post) {
     return GridTile(
-      child: Image(
-        image: CachedNetworkImageProvider(post.imageUrl),
-        fit: BoxFit.cover,
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => CommetScreen(
+                      postId: post.id,
+                      likeConut: post.likeCount,
+                    ))),
+        child: Image(
+          image: CachedNetworkImageProvider(post.imageUrl),
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
